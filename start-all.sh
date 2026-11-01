@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Run this script once to start EVERYTHING: PostgreSQL + API + Frontend
-# Usage: wsl bash /mnt/e/.../start-all.sh
+# Usage: wsl bash start-all.sh
 
-export PATH="/home/sivakrishna/.nvm/versions/node/v24.21.0/bin:$PATH"
+export PATH="$HOME/.nvm/versions/node/v24.21.0/bin:$PATH"
 export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/iot_firmware"
 export CORS_ALLOWED_ORIGINS="http://localhost:5173"
 export NODE_ENV="development"
-LINUX_PROJECT="/home/sivakrishna/iot-analyzer"
+LINUX_PROJECT="${PROJECT_DIR:-$HOME/iot-analyzer}"
 
-echo "=== [1/3] Starting PostgreSQL ==="
-echo sivakrishna | sudo -S service postgresql start
+echo "=== [1/3] Checking PostgreSQL ==="
+if ! pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+  echo "Starting PostgreSQL service..."
+  sudo service postgresql start
+fi
 pg_isready -h localhost -p 5432 || { echo "ERROR: PostgreSQL not ready"; exit 1; }
 
 echo ""

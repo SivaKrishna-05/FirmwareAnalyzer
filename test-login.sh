@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+EMAIL="${1:-admin@example.com}"
+PASSWORD="${2:-AdminPassword@123}"
+
 curl -i -X POST http://localhost:5000/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"sivakrishnapothuraju3@gmail.com","password":"SivaKrishna@123"}'
+  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}"

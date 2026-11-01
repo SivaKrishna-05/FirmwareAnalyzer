@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-export PATH="/home/sivakrishna/.nvm/versions/node/v24.21.0/bin:$PATH"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$HOME/.nvm/versions/node/v24.21.0/bin:$PATH"
 
-EMAIL="${1:-sivakrishnapothuraju3@gmail.com}"
-NEW_PW="${2:-SivaKrishna@123}"
+EMAIL="${1:-admin@example.com}"
+NEW_PW="${2:-AdminPassword@123}"
 
 echo "Generating scrypt hash for: $EMAIL"
-OUTPUT=$(node /mnt/e/IoT-Firmware-Security-Analyzer-phase4/IoT-Firmware-Security-Analyzer/generate-hash.mjs "$NEW_PW")
+OUTPUT=$(node "$SCRIPT_DIR/generate-hash.mjs" "$NEW_PW")
 
 HASH=$(echo "$OUTPUT" | sed -n '1p')
 SALT=$(echo "$OUTPUT" | sed -n '2p')

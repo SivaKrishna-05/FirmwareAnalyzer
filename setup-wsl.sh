@@ -2,9 +2,10 @@
 # Setup IoT Firmware Analyzer in WSL native filesystem
 # Run once to set up, then use start-from-linux.sh to start
 
-export PATH="/home/sivakrishna/.nvm/versions/node/v24.21.0/bin:$PATH"
-PROJECT_WIN="/mnt/e/IoT-Firmware-Security-Analyzer-phase4/IoT-Firmware-Security-Analyzer"
-PROJECT_LINUX="/home/sivakrishna/iot-analyzer"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$HOME/.nvm/versions/node/v24.21.0/bin:$PATH"
+PROJECT_WIN="$SCRIPT_DIR"
+PROJECT_LINUX="${PROJECT_DIR:-$HOME/iot-analyzer}"
 
 echo "[1/4] Syncing source code to Linux filesystem..."
 mkdir -p "$PROJECT_LINUX"

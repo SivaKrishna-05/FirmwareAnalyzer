@@ -1,6 +1,6 @@
 import { randomBytes, scrypt } from "node:crypto";
 
-const newPassword = process.argv[2] || "SivaKrishna@123";
+const newPassword = process.argv[2] || "AdminPassword@123";
 
 const DEFAULT_PASSWORD_PARAMS = {
   algorithm: "scrypt",

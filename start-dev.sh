@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -e
-export PATH="/home/sivakrishna/.nvm/versions/node/v24.21.0/bin:$PATH"
-
-PROJECT="/mnt/e/IoT-Firmware-Security-Analyzer-phase4/IoT-Firmware-Security-Analyzer"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$HOME/.nvm/versions/node/v24.21.0/bin:$PATH"
 
 echo "=== Starting PostgreSQL ==="
 sudo service postgresql start
@@ -10,12 +9,12 @@ pg_isready -h localhost -p 5432
 
 echo ""
 echo "=== Running DB Migrations ==="
-cd "$PROJECT"
+cd "$SCRIPT_DIR"
 pnpm --filter @workspace/db run migrate
 
 echo ""
 echo "=== Building API Server ==="
-cd "$PROJECT"
+cd "$SCRIPT_DIR"
 pnpm --filter @workspace/api-server run build
 
 echo ""

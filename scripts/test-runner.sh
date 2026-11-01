@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-export PATH="/home/sivakrishna/.nvm/versions/node/v24.21.0/bin:$PATH"
-cd /home/sivakrishna/iot-analyzer
+export PATH="$HOME/.nvm/versions/node/v24.21.0/bin:$PATH"
+LINUX_PROJECT="${PROJECT_DIR:-$HOME/iot-analyzer}"
+cd "$LINUX_PROJECT"
 pnpm test

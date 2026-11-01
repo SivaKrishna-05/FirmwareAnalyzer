@@ -3,8 +3,8 @@ import pg from "pg";
 
 const { Pool } = pg;
 
-const email = process.argv[2] || "sivakrishnapothuraju3@gmail.com";
-const newPassword = process.argv[3] || "SivaKrishna@123";
+const email = process.argv[2] || "admin@example.com";
+const newPassword = process.argv[3] || "AdminPassword@123";
 
 const DEFAULT_PASSWORD_PARAMS = {
   algorithm: "scrypt",
@@ -51,33 +51,32 @@ async function reset() {
 
   const { hash, salt, params } = await hashPassword(newPassword);
 
-  const res = await pool.query(
-    `UPDATE users 
-     SET password_hash = $1, 
-         password_salt = $2, 
-         password_params = $3,
-         failed_login_count = 0,
-         locked_until = NULL
-     WHERE LOWER(email) = LOWER($4)
-     RETURNING id, email, name, role`,
-    [hash, salt, JSON.stringify(params), email]
-  );
+  const client = await pool.connect();
+  try {
+    const res = await client.query(
+      `UPDATE users
+       SET password_hash = $1,
+           password_salt = $2,
+           password_params = $3::jsonb,
+           failed_login_count = 0,
+           locked_until = NULL
+       WHERE LOWER(email) = LOWER($4)
+       RETURNING id, email, name, role;`,
+      [hash, salt, JSON.stringify(params), email]
+    );
 
-  if (res.rowCount === 0) {
-    console.error(`User with email "${email}" not found in database!`);
+    if (res.rows.length === 0) {
+      console.log(`User not found: ${email}`);
+    } else {
+      console.log("Password updated successfully:", res.rows[0]);
+    }
+  } finally {
+    client.release();
     await pool.end();
-    process.exit(1);
   }
-
-  console.log("✔ Password successfully updated for user:", res.rows[0]);
-  console.log(`\nYou can now log in with:`);
-  console.log(`Email:    ${res.rows[0].email}`);
-  console.log(`Password: ${newPassword}\n`);
-  await pool.end();
 }
 
-reset().catch(async (err) => {
-  console.error("Failed to reset password:", err);
-  await pool.end();
+reset().catch((err) => {
+  console.error("Password reset failed:", err);
   process.exit(1);
 });
