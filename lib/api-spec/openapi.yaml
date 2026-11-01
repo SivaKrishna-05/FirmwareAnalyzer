@@ -1,0 +1,546 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: IoT Firmware Security Analyzer API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: session
+    description: Current signed-in user context
+  - name: dashboard
+    description: Dashboard summaries
+  - name: scans
+    description: Firmware scans and analysis progress
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /session:
+    get:
+      operationId: getSession
+      tags: [session]
+      summary: Get the current user session
+      responses:
+        "200":
+          description: Current session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+  /firmware/formats:
+    get:
+      operationId: listFirmwareFormats
+      tags: [scans]
+      summary: List supported firmware formats and upload limits
+      responses:
+        "200":
+          description: Supported firmware formats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FirmwareFormats"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard totals and recent scan activity
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /scans:
+    get:
+      operationId: listScans
+      tags: [scans]
+      summary: List scans visible to the current user
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, completed, running, failed]
+            default: all
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Scan history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Scan"
+    post:
+      operationId: createScan
+      tags: [scans]
+      summary: Create a firmware scan from one uploaded file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ScanUploadInput"
+      responses:
+        "201":
+          description: Scan accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scan"
+        "400":
+          description: Invalid, unsupported, encrypted, or corrupted firmware
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /scans/{scanId}:
+    get:
+      operationId: getScan
+      tags: [scans]
+      summary: Get a scan and its result summary
+      parameters:
+        - $ref: "#/components/parameters/ScanId"
+      responses:
+        "200":
+          description: Scan detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanDetail"
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteScan
+      tags: [scans]
+      summary: Permanently delete a scan, its file inventory, and its findings
+      parameters:
+        - $ref: "#/components/parameters/ScanId"
+      responses:
+        "204":
+          description: Scan deleted
+        "404":
+          description: Scan not found (also returned when the caller may not access it)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /scans/{scanId}/progress:
+    get:
+      operationId: getScanProgress
+      tags: [scans]
+      summary: Get live analysis progress
+      parameters:
+        - $ref: "#/components/parameters/ScanId"
+      responses:
+        "200":
+          description: Analysis progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanProgress"
+  /scans/{scanId}/files:
+    get:
+      operationId: listScanFiles
+      tags: [scans]
+      summary: Browse the retained file inventory for analyst views
+      parameters:
+        - $ref: "#/components/parameters/ScanId"
+      responses:
+        "200":
+          description: File inventory
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScanFile"
+  /scans/{scanId}/vulnerabilities:
+    get:
+      operationId: listScanVulnerabilities
+      tags: [scans]
+      summary: List evidence-backed vulnerability findings
+      parameters:
+        - $ref: "#/components/parameters/ScanId"
+      responses:
+        "200":
+          description: Vulnerability findings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VulnerabilityFinding"
+  /scans/{scanId}/report:
+    get:
+      operationId: getScanReport
+      tags: [scans]
+      summary: Get a printable report payload
+      parameters:
+        - $ref: "#/components/parameters/ScanId"
+      responses:
+        "200":
+          description: Report metadata and printable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+components:
+  parameters:
+    ScanId:
+      name: scanId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+      required: [error]
+    Role:
+      type: string
+      # Values match the RBAC matrix in lib/auth/rbac.ts and the users_role_check
+      # constraint in migration 0002. "user" is the general-user role.
+      enum: [admin, analyst, user]
+    Session:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+        user:
+          type: ["object", "null"]
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            email:
+              type: string
+            role:
+              $ref: "#/components/schemas/Role"
+          required: [id, name, email, role]
+        permissions:
+          type: array
+          description: Capabilities granted to this user's role; the client uses these to hide actions it cannot perform. Authorization is still enforced server-side.
+          items:
+            type: string
+        needsBootstrap:
+          type: boolean
+          description: True only when no account exists yet, so the client can offer first-run administrator creation.
+      required: [authenticated, user, permissions, needsBootstrap]
+    FirmwareFormats:
+      type: object
+      properties:
+        extensions:
+          type: array
+          items:
+            type: string
+        maxUploadBytes:
+          type: integer
+      required: [extensions, maxUploadBytes]
+    ScanStatus:
+      type: string
+      enum:
+        - Uploaded
+        - Validating
+        - Extracting
+        - Extraction Failed
+        - Analysis Running
+        - Analysis Completed
+        - Analysis Failed
+        - Unsupported
+        - Encrypted
+        - Corrupted
+    RiskLevel:
+      type: string
+      enum: [LOW, MEDIUM, HIGH, CRITICAL]
+    Scan:
+      type: object
+      properties:
+        id:
+          type: string
+        firmwareName:
+          type: string
+        firmwareType:
+          type: string
+        sizeBytes:
+          type: integer
+        status:
+          $ref: "#/components/schemas/ScanStatus"
+        riskScore:
+          type: ["integer", "null"]
+        riskLevel:
+          type: ["string", "null"]
+          enum: [LOW, MEDIUM, HIGH, CRITICAL, null]
+        vulnerabilityCount:
+          type: integer
+        malwareIndicatorCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+      required:
+        - id
+        - firmwareName
+        - firmwareType
+        - sizeBytes
+        - status
+        - riskScore
+        - riskLevel
+        - vulnerabilityCount
+        - malwareIndicatorCount
+        - createdAt
+        - completedAt
+    ScanUploadInput:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required: [file]
+    ScanDetail:
+      allOf:
+        - $ref: "#/components/schemas/Scan"
+        - type: object
+          properties:
+            architecture:
+              type: ["string", "null"]
+            operatingSystem:
+              type: ["string", "null"]
+            filesystem:
+              type: ["string", "null"]
+            extractionStatus:
+              type: string
+            extractionMethod:
+              type: ["string", "null"]
+              description: Extractor(s) that actually ran (unzip, unsquashfs, ubireader, ...); null when nothing was unpacked
+            extractedFileCount:
+              type: integer
+            extractionDepth:
+              type: integer
+              description: Deepest successfully unpacked nesting level
+            extractionNotes:
+              type: ["string", "null"]
+              description: Newline-separated notes, including capabilities unavailable in this deployment
+            sha256:
+              type: ["string", "null"]
+            findings:
+              type: array
+              items:
+                $ref: "#/components/schemas/VulnerabilityFinding"
+          required: [architecture, operatingSystem, filesystem, extractionStatus, extractionMethod, extractedFileCount, extractionDepth, extractionNotes, sha256, findings]
+    ProgressStage:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        status:
+          type: string
+          enum: [pending, running, completed, failed, skipped]
+        detail:
+          type: ["string", "null"]
+      required: [key, label, status, detail]
+    ScanProgress:
+      type: object
+      properties:
+        scanId:
+          type: string
+        status:
+          $ref: "#/components/schemas/ScanStatus"
+        percent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        message:
+          type: string
+        stages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressStage"
+      required: [scanId, status, percent, message, stages]
+    ScanFile:
+      type: object
+      properties:
+        path:
+          type: string
+        type:
+          type: string
+        sizeBytes:
+          type: integer
+        permissions:
+          type: ["string", "null"]
+        owner:
+          type: ["string", "null"]
+          description: Numeric UID, or "name (uid)" when resolved from an extracted /etc/passwd
+        group:
+          type: ["string", "null"]
+          description: Numeric GID, or "name (gid)" when resolved from an extracted /etc/group
+        sha256:
+          type: string
+        md5:
+          type: ["string", "null"]
+        sha1:
+          type: ["string", "null"]
+        executable:
+          type: boolean
+        suspicious:
+          type: boolean
+        suspiciousReason:
+          type: ["string", "null"]
+        stringsCount:
+          type: integer
+        entropy:
+          type: ["number", "null"]
+          description: Shannon entropy (0-8) of the sampled bytes; high entropy on a non-archive file can indicate packing/encryption
+        binaryInfo:
+          type: ["object", "null"]
+          description: Populated for ELF binaries via readelf; null for non-executables or when readelf is unavailable
+          properties:
+            architecture:
+              type: ["string", "null"]
+            endianness:
+              type: ["string", "null"]
+            entryPoint:
+              type: ["string", "null"]
+            interpreter:
+              type: ["string", "null"]
+            sections:
+              type: array
+              items:
+                type: string
+            dynamicDependencies:
+              type: array
+              items:
+                type: string
+            symbolCount:
+              type: ["integer", "null"]
+      required: [path, type, sizeBytes, permissions, owner, group, sha256, md5, sha1, executable, suspicious, suspiciousReason, stringsCount, entropy, binaryInfo]
+    VulnerabilityCategory:
+      type: string
+      enum:
+        - Hardcoded Credentials
+        - Insecure Configuration
+        - Outdated/Vulnerable Software
+        - Weak Cryptography
+        - Insecure Network Services
+        - Excessive/Unsafe File Permissions
+        - Sensitive Information Exposure
+        - Dangerous Commands/Code Execution Indicators
+        - Other Security Weaknesses
+    Severity:
+      type: string
+      enum: [Critical, High, Medium, Low, Informational]
+    VulnerabilityFinding:
+      type: object
+      properties:
+        id:
+          type: string
+        category:
+          $ref: "#/components/schemas/VulnerabilityCategory"
+        title:
+          type: string
+        severity:
+          $ref: "#/components/schemas/Severity"
+        affectedPath:
+          type: string
+        description:
+          type: string
+        evidence:
+          type: string
+        confidence:
+          type: string
+          enum: [high, medium, low]
+        recommendation:
+          type: string
+        cve:
+          type: ["string", "null"]
+        component:
+          type: ["string", "null"]
+          description: Software component this finding concerns, when applicable
+        componentVersion:
+          type: ["string", "null"]
+        detectionSource:
+          type: ["string", "null"]
+          description: Which check or pattern produced this finding, for analyst audit
+      required: [id, category, title, severity, affectedPath, description, evidence, confidence, recommendation, cve, component, componentVersion, detectionSource]
+    DashboardSummary:
+      type: object
+      properties:
+        totalScans:
+          type: integer
+        completedScans:
+          type: integer
+        runningScans:
+          type: integer
+        highRiskScans:
+          type: integer
+        averageRiskScore:
+          type: ["integer", "null"]
+          description: Null when no scan in scope has completed a risk assessment yet (not 0 — zero scans cannot support "average risk is zero")
+        recentScans:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scan"
+      required: [totalScans, completedScans, runningScans, highRiskScans, averageRiskScore, recentScans]
+    Report:
+      type: object
+      properties:
+        scanId:
+          type: string
+        title:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        html:
+          type: string
+        sha256:
+          type: string
+      required: [scanId, title, generatedAt, html, sha256]
+

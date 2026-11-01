@@ -1,0 +1,78 @@
+import type { YaraRule } from "./types";
+
+export const YARA_RULES: YaraRule[] = [
+  {
+    id: "YARA_MIRAI_STRINGS",
+    name: "Mirai Botnet Indicators",
+    category: "Botnet",
+    severity: "Critical",
+    description: "Contains signature strings associated with Mirai botnet family binaries (botnet command execution or telnet brute-forcer)",
+    strings: [
+      "/bin/busybox MIRAI",
+      "POST /cdn-cgi/",
+      "OONM",
+      "busybox wget http",
+      "busybox tftp -g",
+      "dvrHelper",
+    ],
+    regexes: [/busybox\s+(tftp|wget)\s+-[r|g]\s+/i],
+  },
+  {
+    id: "YARA_REVERSE_SHELL",
+    name: "Reverse Shell Payload / Script",
+    category: "Reverse Shell",
+    severity: "High",
+    description: "Contains commands or code constructing interactive reverse shell connections",
+    strings: [
+      "/dev/tcp/",
+      "bash -i >& /dev/tcp",
+      "nc -e /bin/sh",
+      "nc -e /bin/bash",
+      "rm -f /tmp/f;mknod /tmp/f p",
+      "python -c 'import socket,subprocess,os;s=socket.socket",
+    ],
+    regexes: [/nc(\.openbsd|\.traditional)?\s+-[e|c]\s+\/bin\/(sh|bash)/i],
+  },
+  {
+    id: "YARA_HARDCODED_CREDENTIALS",
+    name: "Embedded Root / Backdoor Credentials",
+    category: "Credential Leak",
+    severity: "High",
+    description: "Contains hardcoded root/admin passwords or known factory backdoor accounts",
+    strings: [
+      "root:$1$7856$aB",
+      "admin:admin1234",
+      "root:xc3511",
+      "admin:54321",
+      "support:support",
+    ],
+    regexes: [/root:\$1\$[a-zA-Z0-9.\/]{8,}/],
+  },
+  {
+    id: "YARA_SUSPICIOUS_CURL_PIPE_SH",
+    name: "Suspicious Remote Execution via Pipe to Shell",
+    category: "Suspicious Command",
+    severity: "High",
+    description: "Downloads remote payload directly piped into shell interpreter (curl/wget | sh)",
+    strings: [
+      "curl -s http | sh",
+      "wget -qO- http | sh",
+      "curl http:// | bash",
+      "wget -O- | /bin/sh",
+    ],
+    regexes: [/(curl|wget)\s+-[^\n|]*\|\s*(sh|bash)/i],
+  },
+  {
+    id: "YARA_PERSISTENCE_CRON_TMP",
+    name: "Suspicious Cron Persistence in Temp Directory",
+    category: "Persistence",
+    severity: "Medium",
+    description: "Schedules automated cron jobs executing hidden binaries from /tmp or /var/tmp",
+    strings: [
+      "* * * * * /tmp/",
+      "* * * * * /var/tmp/",
+      "@reboot /tmp/",
+    ],
+    regexes: [/\*\s+\*\s+\*\s+\*\s+\*\s+\/tmp\//],
+  },
+];

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "IoT Firmware Security Analyzer"
+description = "A secure firmware analysis workspace for security analysts and general users. Upload one IoT firmware image, track evidence-backed static analysis, review risk findings, and keep only the report metadata after temporary files are deleted."
+version = "1.0.0"
+id = "artifacts/firmware-analyzer"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21834
+
+[services.development]
+run = "pnpm --filter @workspace/firmware-analyzer run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/firmware-analyzer", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/firmware-analyzer/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21834"
+BASE_PATH = "/"

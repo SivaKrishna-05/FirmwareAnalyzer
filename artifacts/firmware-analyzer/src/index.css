@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background)); --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border)); --color-input: hsl(var(--input)); --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card)); --color-card-foreground: hsl(var(--card-foreground)); --color-card-border: hsl(var(--card-border));
+  --color-popover: hsl(var(--popover)); --color-popover-foreground: hsl(var(--popover-foreground)); --color-popover-border: hsl(var(--popover-border));
+  --color-primary: hsl(var(--primary)); --color-primary-foreground: hsl(var(--primary-foreground)); --color-primary-border: var(--primary-border);
+  --color-secondary: hsl(var(--secondary)); --color-secondary-foreground: hsl(var(--secondary-foreground)); --color-secondary-border: var(--secondary-border);
+  --color-muted: hsl(var(--muted)); --color-muted-foreground: hsl(var(--muted-foreground)); --color-muted-border: var(--muted-border);
+  --color-accent: hsl(var(--accent)); --color-accent-foreground: hsl(var(--accent-foreground)); --color-accent-border: var(--accent-border);
+  --color-destructive: hsl(var(--destructive)); --color-destructive-foreground: hsl(var(--destructive-foreground)); --color-destructive-border: var(--destructive-border);
+  --color-sidebar: hsl(var(--sidebar)); --color-sidebar-foreground: hsl(var(--sidebar-foreground)); --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary)); --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent)); --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground)); --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --font-sans: var(--app-font-sans); --font-serif: var(--app-font-serif); --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 208 38% 96%; --foreground: 219 37% 15%; --border: 211 26% 86%;
+  --card: 0 0% 100%; --card-foreground: 219 37% 15%; --card-border: 211 26% 86%;
+  --sidebar: 219 38% 16%; --sidebar-foreground: 210 35% 91%; --sidebar-border: 220 27% 25%;
+  --sidebar-primary: 14 82% 63%; --sidebar-primary-foreground: 219 38% 16%; --sidebar-accent: 220 30% 23%; --sidebar-accent-foreground: 210 35% 94%; --sidebar-ring: 14 82% 63%;
+  --popover: 0 0% 100%; --popover-foreground: 219 37% 15%; --popover-border: 211 26% 86%;
+  --primary: 14 82% 63%; --primary-foreground: 219 38% 16%; --secondary: 190 46% 89%; --secondary-foreground: 194 52% 25%;
+  --muted: 207 30% 92%; --muted-foreground: 214 16% 45%; --accent: 190 62% 43%; --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 53%; --destructive-foreground: 0 0% 100%; --input: 211 26% 82%; --ring: 190 62% 43%;
+  --chart-1: 14 82% 63%; --chart-2: 190 62% 43%; --chart-3: 219 38% 16%; --chart-4: 43 88% 62%; --chart-5: 272 46% 61%;
+  --app-font-sans: 'Manrope', sans-serif; --app-font-serif: 'Space Grotesk', sans-serif; --app-font-mono: 'DM Mono', monospace; --radius: .8rem;
+  --primary-border: hsl(var(--primary)); --secondary-border: hsl(var(--secondary)); --muted-border: hsl(var(--muted)); --accent-border: hsl(var(--accent)); --destructive-border: hsl(var(--destructive));
+  --shadow-2xs: 0 1px 1px hsl(219 38% 16% / .04); --shadow-xs: 0 2px 5px hsl(219 38% 16% / .05); --shadow-sm: 0 4px 12px hsl(219 38% 16% / .06);
+  --shadow: 0 10px 25px hsl(219 38% 16% / .08); --shadow-md: 0 14px 30px hsl(219 38% 16% / .1); --shadow-lg: 0 22px 50px hsl(219 38% 16% / .12);
+}
+.dark {
+  --background: 219 38% 10%; --foreground: 210 35% 93%; --border: 220 27% 26%; --card: 219 34% 14%; --card-foreground: 210 35% 93%; --card-border: 220 27% 26%;
+  --sidebar: 219 42% 8%; --sidebar-foreground: 210 35% 91%; --sidebar-border: 220 27% 20%; --sidebar-primary: 14 82% 63%; --sidebar-primary-foreground: 219 38% 10%; --sidebar-accent: 220 30% 16%; --sidebar-accent-foreground: 210 35% 94%; --sidebar-ring: 14 82% 63%;
+  --popover: 219 34% 14%; --popover-foreground: 210 35% 93%; --popover-border: 220 27% 26%; --primary: 14 82% 63%; --primary-foreground: 219 42% 8%; --secondary: 190 32% 20%; --secondary-foreground: 190 54% 86%;
+  --muted: 220 28% 19%; --muted-foreground: 214 17% 66%; --accent: 190 62% 43%; --accent-foreground: 219 42% 8%; --destructive: 0 72% 57%; --destructive-foreground: 0 0% 100%; --input: 220 27% 31%; --ring: 190 62% 43%;
+  --chart-1: 14 82% 63%; --chart-2: 190 62% 43%; --chart-3: 210 35% 80%; --chart-4: 43 88% 62%; --chart-5: 272 46% 61%;
+  --primary-border: hsl(var(--primary)); --secondary-border: hsl(var(--secondary)); --muted-border: hsl(var(--muted)); --accent-border: hsl(var(--accent)); --destructive-border: hsl(var(--destructive));
+}
+@layer base { * { @apply border-border; } body { @apply font-sans antialiased bg-background text-foreground; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scan-pulse { 0%,100% { transform: scaleX(.35); opacity: .35; } 50% { transform: scaleX(1); opacity: 1; } }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.page-enter { animation: rise-in .42s cubic-bezier(.2,.8,.2,1) both; }
+.delay-1 { animation-delay: .06s; } .delay-2 { animation-delay: .12s; } .delay-3 { animation-delay: .18s; }
+.text-balance { text-wrap: balance; } .mono { font-family: var(--app-font-mono); }
+.skeleton { background: linear-gradient(90deg,hsl(var(--muted)) 25%,hsl(var(--card)) 50%,hsl(var(--muted)) 75%); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
+.scan-line { height: 2px; background: hsl(var(--primary)); transform-origin: left; animation: scan-pulse 1.3s ease-in-out infinite; }
+.dot-grid { background-image: radial-gradient(hsl(var(--border) / .7) 1px,transparent 1px); background-size: 18px 18px; }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }

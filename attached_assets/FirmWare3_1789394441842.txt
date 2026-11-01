@@ -1,0 +1,1845 @@
+# MASTER PROMPT — COMPLETE THE EXISTING PROJECT
+
+You are an expert full-stack developer, cybersecurity engineer, firmware-analysis engineer, malware-analysis engineer, reverse-engineering engineer, ML engineer, DevSecOps engineer, database architect, and UI/UX engineer.
+
+I already have an existing project named:
+
+# IoT Firmware Vulnerability & Malware Analyzer
+
+I have provided the existing project ZIP/codebase to you.
+
+Your task is **NOT to create a simple mockup or fake demonstration**.
+
+Your task is to:
+
+> **AUDIT THE EXISTING PROJECT → IDENTIFY GAPS → FIX ERRORS → IMPLEMENT THE MISSING FEATURES → TEST EVERYTHING → DELIVER A WORKING APPLICATION.**
+
+Do not unnecessarily rebuild components that already work.
+
+Preserve useful existing frontend/UI components and existing architecture where practical, but modify them whenever required to support the real functionality below.
+
+---
+
+# 1. FIRST: AUDIT THE EXISTING PROJECT
+
+Before changing code:
+
+1. Inspect the complete project structure.
+2. Inspect frontend code.
+3. Inspect backend code.
+4. Inspect database schema.
+5. Inspect API routes.
+6. Inspect authentication.
+7. Inspect firmware-analysis code.
+8. Inspect report generation.
+9. Inspect scan-history implementation.
+10. Inspect configuration/environment files.
+11. Inspect package dependencies.
+12. Inspect existing tests.
+13. Identify fake/mock/simulated functionality.
+14. Identify incomplete functionality.
+15. Identify security vulnerabilities in the application itself.
+16. Identify broken frontend/backend integrations.
+17. Identify inconsistent data models.
+18. Identify unused/dead code.
+19. Identify dependencies that are unnecessary or unsafe.
+
+Create an internal implementation plan based on this audit.
+
+Do NOT immediately generate hundreds of lines of code.
+
+First determine what already works and what must be replaced.
+
+---
+
+# 2. IMPORTANT: DO NOT FAKE SECURITY ANALYSIS
+
+This is a cybersecurity application.
+
+Never generate fake findings merely to make the dashboard look impressive.
+
+Do NOT:
+
+* hardcode fake CVEs
+* invent vulnerabilities
+* invent malware detections
+* invent software versions
+* generate fake ML probabilities
+* pretend YARA executed when it did not
+* claim firmware extraction succeeded when it did not
+* claim a file was deleted when it was not
+
+Every finding must come from an actual analysis process.
+
+If a feature is unavailable, report it honestly as:
+
+"Analysis unavailable"
+
+or:
+
+"Unable to determine"
+
+rather than inventing a result.
+
+---
+
+# 3. CORE PROJECT PURPOSE
+
+The application analyzes IoT firmware and identifies:
+
+* Firmware/device information
+* Files and directories
+* Executable/binary files
+* Configuration files
+* Usernames/passwords
+* API keys/tokens
+* Private keys/certificates
+* Software/library names and versions
+* Network services and ports
+* File permissions
+* Strings
+* Suspicious files
+* Malware indicators
+* File hashes
+* Known CVEs
+* Security vulnerabilities
+* Malware/YARA indicators
+* ML-based malware classification
+* Overall security risk
+
+The application must be useful for both:
+
+### General Users
+
+Simple explanations, risk level, important findings, and recommendations.
+
+### Security Analysts
+
+Detailed technical evidence, files, hashes, CVEs, YARA matches, binary information, and ML results.
+
+---
+
+# 4. APPLICATION TYPE
+
+This is a:
+
+> SOFTWARE-ONLY WEB APPLICATION
+
+Do NOT require physical IoT hardware.
+
+Do NOT require:
+
+* Raspberry Pi
+* Arduino
+* physical router
+* physical camera
+* sensors
+* smart home hardware
+
+Firmware files are the primary input.
+
+---
+
+# 5. SUPPORTED FIRMWARE INPUT
+
+Support multiple formats.
+
+At minimum design support for:
+
+* .bin
+* .img
+* .zip
+* .tar
+* .tar.gz
+* .tgz
+* .squashfs
+* .ubi
+* .fw
+
+Also design the system so additional formats can be added later.
+
+IMPORTANT:
+
+The frontend and backend must use the SAME centralized definition of supported formats.
+
+Do not let the frontend advertise a format that the backend cannot process.
+
+---
+
+# 6. UPLOAD SYSTEM
+
+Implement:
+
+* Click-to-upload
+* Drag-and-drop
+* File size validation
+* File extension/type validation
+* File signature/magic-byte validation where possible
+* Upload progress
+* Error handling
+* Analysis start button
+
+Do not trust the filename extension.
+
+The actual file must be inspected.
+
+---
+
+# 7. FIRMWARE VALIDATION
+
+Detect and properly handle:
+
+### Supported firmware
+
+Continue analysis.
+
+### Compressed firmware
+
+Automatically extract supported compression/archive formats.
+
+### Encrypted archive/firmware
+
+Do not bypass encryption.
+
+Show:
+
+"Analysis cannot continue because the firmware is encrypted. Please provide the required key or a decrypted firmware image."
+
+Record this status.
+
+### Corrupted firmware
+
+Detect extraction/validation failure.
+
+Stop analysis.
+
+Show:
+
+"Firmware appears to be corrupted or incomplete. Analysis has been stopped."
+
+Record the status.
+
+### Unsupported firmware
+
+Show:
+
+"Unsupported firmware format. Please provide a supported firmware format."
+
+Record the status.
+
+---
+
+# 8. REAL FIRMWARE EXTRACTION
+
+This is one of the highest-priority requirements.
+
+The current project must not merely convert the uploaded firmware bytes into strings.
+
+Implement REAL firmware extraction.
+
+The pipeline should be:
+
+Firmware upload
+→ File identification
+→ Format detection
+→ Compression detection
+→ Filesystem detection
+→ Safe extraction
+→ File/directory inventory
+→ Individual file analysis
+
+Support common embedded filesystems where practical, including:
+
+* SquashFS
+* CramFS
+* ext filesystem images
+* UBIFS/UBI where supported
+* tar archives
+* ZIP archives
+* gzip-compressed content
+* other formats supported by the chosen extraction tooling
+
+Use appropriate firmware-analysis utilities.
+
+If a format cannot be safely extracted, report that clearly.
+
+---
+
+# 9. SECURITY ISOLATION
+
+Treat every uploaded firmware file as UNTRUSTED.
+
+Never directly execute arbitrary firmware on the host machine.
+
+Use:
+
+* isolated temporary directories
+* containers/sandboxing where practical
+* restricted permissions
+* subprocess timeouts
+* CPU/memory limits where practical
+* file-size limits
+* analysis timeouts
+* path traversal protection
+* safe subprocess invocation
+
+Do not use:
+
+shell=True
+
+with untrusted user input.
+
+Never construct shell commands by concatenating uploaded filenames or user input.
+
+---
+
+# 10. FILE AND DIRECTORY INVENTORY
+
+After extraction, build a real inventory.
+
+Example:
+
+/etc
+├── passwd
+├── shadow
+├── config
+└── services
+
+/bin
+├── busybox
+├── sh
+└── suspicious_binary
+
+/usr/bin
+└── ...
+
+For every discovered file where possible store:
+
+* path
+* filename
+* file type
+* size
+* permissions
+* owner
+* group
+* SHA-256
+* MD5
+* SHA-1
+* executable status
+* suspicious status
+
+Do not expose sensitive file contents unnecessarily.
+
+---
+
+# 11. FIRMWARE INFORMATION
+
+Automatically determine where possible:
+
+* Firmware name
+* File size
+* Firmware type
+* Firmware version
+* Vendor
+* Device information
+* Architecture
+* Operating system
+* Filesystem
+* Compression
+* Extraction status
+* Analysis status
+
+Possible architectures:
+
+* ARM
+* ARM64
+* MIPS
+* MIPS64
+* x86
+* x86_64
+* PowerPC
+* other detectable architectures
+
+If information cannot be determined:
+
+> Unknown
+
+Never guess.
+
+---
+
+# 12. BINARY ANALYSIS
+
+Identify executable files and binaries.
+
+For ELF files analyze:
+
+* architecture
+* endianness
+* entry point
+* sections
+* imported libraries
+* symbols where available
+* dynamic dependencies
+* strings
+* entropy
+* suspicious functions
+* file hash
+
+Use appropriate binary-analysis tools such as:
+
+* file
+* readelf
+* objdump
+* radare2
+* Ghidra where practical
+
+Do not require Ghidra for every file if it makes automated analysis impractical.
+
+---
+
+# 13. STRINGS ANALYSIS
+
+Extract printable strings from:
+
+* binaries
+* scripts
+* configuration files
+* firmware components
+
+Search strings for security-relevant indicators.
+
+Display useful evidence.
+
+Do not treat every suspicious-looking string as a vulnerability.
+
+---
+
+# 14. CONFIGURATION ANALYSIS
+
+Analyze configuration files including:
+
+* .conf
+* .cfg
+* .ini
+* .json
+* .xml
+* shell scripts
+* init scripts
+* service configurations
+* embedded Linux configuration files
+
+Look for:
+
+* insecure authentication
+* debug settings
+* Telnet
+* FTP
+* remote administration
+* weak encryption
+* unsafe services
+* insecure defaults
+* dangerous configurations
+
+Every finding should include evidence.
+
+---
+
+# 15. CREDENTIAL AND SECRET DETECTION
+
+Detect:
+
+### Usernames/passwords
+
+* hardcoded credentials
+* default credentials
+* username/password fields
+* authentication configuration
+
+### API keys/tokens
+
+* API keys
+* access tokens
+* authentication tokens
+* secret tokens
+
+### Private keys/certificates
+
+Detect:
+
+* PEM private keys
+* RSA keys
+* EC keys
+* certificate files
+* .key files
+* .pem files
+* id_rsa-style keys
+* embedded certificate/key blocks
+
+Mask sensitive information.
+
+Example:
+
+password=My********123
+
+Never store or display secrets unnecessarily.
+
+---
+
+# 16. SOFTWARE/LIBRARY IDENTIFICATION
+
+Identify software components and versions.
+
+Examples:
+
+* OpenSSL
+* BusyBox
+* Dropbear
+* OpenSSH
+* nginx
+* curl
+* wget
+* Linux kernel
+* other embedded packages
+
+For every component store:
+
+* component name
+* version
+* location
+* evidence
+* confidence
+
+If version cannot be reliably identified:
+
+Version = Unknown
+
+NEVER guess.
+
+---
+
+# 17. CVE ENGINE
+
+Implement real CVE lookup.
+
+Pipeline:
+
+Detected component
+→ Detected version
+→ Vulnerability database
+→ Match
+→ CVE
+→ Severity/CVSS
+→ Evidence
+→ Recommendation
+
+Use a trusted CVE source/database.
+
+The system should support updating vulnerability information.
+
+For each CVE show:
+
+* CVE ID
+* affected component
+* detected version
+* severity
+* CVSS score where available
+* description
+* affected file/component
+* recommended action
+
+If a version is Unknown:
+
+Do not guess.
+
+Mark the CVE lookup as requiring verification when appropriate.
+
+Do not claim that every CVE associated with a product necessarily affects the firmware.
+
+---
+
+# 18. EXACTLY NINE VULNERABILITY CATEGORIES
+
+Use EXACTLY these nine categories:
+
+1. Hardcoded Credentials
+2. Insecure Configuration
+3. Outdated/Vulnerable Software
+4. Weak Cryptography
+5. Insecure Network Services
+6. Excessive/Unsafe File Permissions
+7. Sensitive Information Exposure
+8. Dangerous Commands/Code Execution Indicators
+9. Other Security Weaknesses
+
+Do not create additional vulnerability categories.
+
+Every vulnerability must belong to one of these categories.
+
+Each finding must include:
+
+* category
+* title
+* severity
+* affected file/component
+* description
+* evidence
+* confidence where appropriate
+* recommendation
+* CVE if applicable
+
+---
+
+# 19. NETWORK SERVICE ANALYSIS
+
+Identify evidence of services such as:
+
+* Telnet
+* SSH
+* FTP
+* HTTP
+* HTTPS
+* other network daemons
+
+Inspect:
+
+* startup scripts
+* service configurations
+* daemon files
+* port references
+* configuration files
+
+Do NOT say a service is definitely active merely because the word appears in a binary/string.
+
+Distinguish:
+
+* Detected
+* Configured
+* Potential
+* Requires verification
+
+---
+
+# 20. FILE PERMISSION ANALYSIS
+
+Analyze extracted filesystem permissions.
+
+Identify issues such as:
+
+* world-writable sensitive files
+* executable configuration files
+* unsafe permissions
+* writable startup scripts
+* suspicious SUID/SGID files where applicable
+
+Include:
+
+* file
+* current permission
+* reason for concern
+* severity
+* recommendation
+
+---
+
+# 21. MALWARE ANALYSIS
+
+Malware analysis is an ADDITIONAL feature.
+
+It is not the primary purpose of the application.
+
+Check for:
+
+* suspicious binaries
+* backdoors
+* botnet indicators
+* suspicious network connections
+* persistence mechanisms
+* shell commands
+* downloaders
+* suspicious scripts
+* YARA matches
+
+Important:
+
+A suspicious indicator is NOT automatically proof of malware.
+
+Use:
+
+"Suspicious indicator"
+
+"Potentially malicious"
+
+"Requires further investigation"
+
+unless there is strong evidence.
+
+---
+
+# 22. YARA INTEGRATION
+
+Implement REAL YARA scanning.
+
+Create a dedicated rule directory:
+
+rules/yara/
+
+Rules must be:
+
+* modular
+* versionable
+* updateable
+* categorized
+* documented
+
+For every match show:
+
+* rule name
+* matched file
+* description
+* severity
+* evidence where appropriate
+* recommendation
+
+Do not show a YARA match if YARA was not actually executed.
+
+Admin must be able to manage/update YARA rules.
+
+---
+
+# 23. ML MALWARE CLASSIFICATION
+
+I prefer ML-based malware detection.
+
+Implement a REAL ML pipeline.
+
+Do not fake ML predictions.
+
+Use a defensible feature-extraction pipeline.
+
+Possible features:
+
+* binary metadata
+* imported functions
+* strings
+* entropy
+* sections
+* opcode/byte features where practical
+* file characteristics
+* network indicators
+* suspicious API/system-call indicators
+
+Pipeline:
+
+Binary
+→ Feature extraction
+→ ML model
+→ Malware probability
+→ Classification
+→ Confidence
+
+Possible output:
+
+Malware probability: 82%
+
+Classification:
+Potential IoT Botnet
+
+Confidence:
+Medium
+
+IMPORTANT:
+
+Clearly label ML output as a prediction.
+
+Do not claim:
+
+"Confirmed malware"
+
+unless supported by evidence.
+
+If the available dataset is insufficient for a reliable ML model:
+
+* implement a baseline model
+* document limitations
+* provide evaluation metrics
+* do not fabricate accuracy
+
+Make the ML model replaceable.
+
+Include:
+
+* training code
+* preprocessing
+* model artifact
+* evaluation
+* inference module
+
+---
+
+# 24. RISK SCORING
+
+Calculate an overall score from 0–100.
+
+Suggested levels:
+
+0–20 = LOW
+21–40 = MEDIUM
+41–70 = HIGH
+71–100 = CRITICAL
+
+Risk should consider:
+
+* vulnerability severity
+* CVSS
+* critical findings
+* number of findings
+* sensitive information
+* malware indicators
+* YARA matches
+* insecure network services
+* dangerous configurations
+* confidence
+
+Avoid double-counting duplicate findings.
+
+Show why the score was calculated.
+
+Example:
+
+Risk Score: 78/100
+Risk Level: HIGH
+
+Main contributors:
+
+* 2 Critical vulnerabilities
+* 4 High vulnerabilities
+* 3 CVEs
+* 2 suspicious binaries
+* 1 YARA match
+
+---
+
+# 25. HOMEPAGE
+
+Preserve/improve the existing homepage.
+
+It must have one primary action:
+
+> Upload Firmware and Analyze
+
+The homepage should include:
+
+* project name/logo
+* short project description
+* Upload Firmware button
+* drag-and-drop upload area
+* supported firmware formats
+* Start Analysis
+* How It Works
+* Security Features
+* Previous Scans
+* Overall Risk Score summary
+* About
+* Security/Privacy notice
+* Help/Documentation
+* Footer
+
+Required flow:
+
+Upload
+→ Extract
+→ Analyze
+→ Detect
+→ Risk Score
+→ Security Report
+
+The provided homepage specification should be preserved.
+
+---
+
+# 26. ANALYSIS PROGRESS
+
+Show real progress based on actual backend stages.
+
+Example:
+
+Validation ✓
+Extraction ✓
+File Discovery ✓
+Binary Analysis ✓
+Configuration Analysis ✓
+Secret Detection ✓
+Software Identification ✓
+CVE Analysis ███████░░░
+YARA Analysis ...
+ML Analysis ...
+Risk Assessment ...
+Report Generation ...
+
+Do NOT fake progress.
+
+If a stage fails, show the actual failure.
+
+---
+
+# 27. FINAL DASHBOARD
+
+The final dashboard must include all major information specified below.
+
+## Firmware Information
+
+* Firmware name
+* File size
+* Architecture
+* Firmware type/version
+* Analysis status
+* Extraction status
+* Completion status
+
+## Risk
+
+* Overall Risk Score
+* Risk Level
+* Main risk factors
+
+## Vulnerability Summary
+
+* Critical
+* High
+* Medium
+* Low
+* Informational
+
+## Vulnerability Details
+
+* vulnerability type
+* affected file/component
+* description
+* severity
+* evidence
+* recommendation
+
+## CVE Findings
+
+* CVE ID
+* affected software
+* version
+* CVSS/severity
+* recommended action
+
+## Malware Analysis
+
+* suspicious binaries
+* backdoors
+* botnet indicators
+* suspicious network connections
+* persistence mechanisms
+* shell commands
+* downloaders
+* YARA matches
+* ML prediction
+
+## Sensitive Information
+
+* hardcoded credentials
+* default credentials
+* API keys/tokens
+* private keys/certificates
+
+Mask secrets.
+
+## Security Recommendations
+
+Prioritized remediation recommendations.
+
+## Report
+
+Download detailed report.
+
+This must match the intended final-result structure from `FirmWare2.txt`.
+
+---
+
+# 28. FILE EXPLORER
+
+Provide an interactive file/directory explorer.
+
+For analysts:
+
+* browse directories
+* inspect files
+* view file metadata
+* view hashes
+* view permissions
+* view binary information
+* view strings
+* view security findings associated with the file
+
+For general users:
+
+Keep technical details collapsed by default.
+
+---
+
+# 29. SCAN HISTORY
+
+Implement real scan history.
+
+Store:
+
+* scan ID
+* user ID
+* firmware name
+* date/time
+* status
+* risk score
+* risk level
+* vulnerability count
+* malware indicator count
+* report information
+
+General User/Security Analyst:
+
+Only their own scans.
+
+Admin:
+
+System-wide scans.
+
+Provide:
+
+* search
+* filtering
+* sorting
+* view details
+* download report
+
+---
+
+# 30. AUTHENTICATION
+
+Replace any demo/fake authentication.
+
+Implement real authentication.
+
+Use:
+
+* securely hashed passwords
+* login
+* logout
+* protected routes
+* secure sessions or secure JWT implementation
+* password validation
+* appropriate session expiration
+
+Never store plaintext passwords.
+
+Do not hardcode demo credentials.
+
+Provide clear authentication errors.
+
+---
+
+# 31. ROLE-BASED ACCESS CONTROL
+
+Implement:
+
+### ADMIN
+
+Can:
+
+* manage users
+* manage CVE data
+* manage YARA rules
+* view all scans
+* view system statistics
+* manage settings
+* view audit logs
+
+### SECURITY ANALYST
+
+Can:
+
+* upload firmware
+* run scans
+* view detailed findings
+* view CVEs
+* view malware analysis
+* download reports
+* view own scan history
+
+### GENERAL USER
+
+Can:
+
+* upload firmware
+* run scans
+* view understandable results
+* download reports
+* view own scan history
+
+Enforce permissions on the BACKEND.
+
+Do not rely only on hiding frontend buttons.
+
+---
+
+# 32. DATABASE IMPROVEMENT
+
+Modify the existing database schema as necessary.
+
+Recommended entities:
+
+* users
+* roles
+* sessions
+* scans
+* firmware_metadata
+* scan_files
+* vulnerabilities
+* cve_findings
+* malware_findings
+* yara_matches
+* sensitive_findings
+* ml_predictions
+* risk_scores
+* reports
+* audit_logs
+* system_settings
+
+Use foreign keys and indexes appropriately.
+
+Ensure every scan belongs to a user.
+
+---
+
+# 33. DATA RETENTION
+
+Implement this exact lifecycle:
+
+Upload firmware
+→ temporary storage
+→ extraction
+→ analysis
+→ results
+→ report
+→ delete original firmware
+→ delete extracted firmware
+→ retain analysis results/report
+
+Do NOT permanently store firmware by default.
+
+Do NOT retain extracted firmware files.
+
+Verify deletion rather than merely logging "deleted."
+
+Show a privacy notice explaining this.
+
+---
+
+# 34. REPORT GENERATION
+
+Create a professional detailed security report.
+
+Include:
+
+1. Executive summary
+2. Firmware information
+3. Analysis status
+4. Extraction status
+5. File statistics
+6. Architecture
+7. Software components
+8. Vulnerability summary
+9. Detailed vulnerabilities
+10. CVE findings
+11. Malware findings
+12. YARA results
+13. ML results
+14. Sensitive information findings
+15. File hashes
+16. Risk score
+17. Security recommendations
+18. Data-retention information
+
+Prefer PDF generation.
+
+If PDF introduces significant instability, first implement a complete HTML/printable report and then add PDF generation.
+
+Never create a fake report.
+
+---
+
+# 35. ADMIN DASHBOARD
+
+Create an Admin-only dashboard.
+
+Show:
+
+* total users
+* total scans
+* completed scans
+* failed scans
+* high-risk scans
+* critical-risk scans
+* vulnerability statistics
+* malware indicator statistics
+* CVE statistics
+* recent activity
+
+Admin controls:
+
+* users
+* roles
+* CVE data
+* YARA rules
+* system settings
+* audit logs
+
+---
+
+# 36. SECURITY OF THE APPLICATION
+
+Perform security hardening.
+
+Protect against:
+
+* path traversal
+* command injection
+* SQL injection
+* XSS
+* CSRF where applicable
+* malicious file uploads
+* zip bombs
+* archive traversal
+* oversized files
+* resource exhaustion
+* unauthorized scan access
+* insecure direct object references
+* secret leakage
+* privilege escalation
+
+Never expose stack traces to normal users.
+
+Never log:
+
+* passwords
+* API keys
+* private keys
+* authentication tokens
+
+---
+
+# 37. API DESIGN
+
+Maintain clean API separation.
+
+Example:
+
+POST /api/auth/login
+
+POST /api/auth/logout
+
+POST /api/scans
+
+GET /api/scans/{id}
+
+GET /api/scans/{id}/progress
+
+GET /api/scans/{id}/firmware
+
+GET /api/scans/{id}/files
+
+GET /api/scans/{id}/vulnerabilities
+
+GET /api/scans/{id}/cves
+
+GET /api/scans/{id}/malware
+
+GET /api/scans/{id}/report
+
+GET /api/scans/history
+
+Admin:
+
+GET /api/admin/users
+
+POST /api/admin/users
+
+PUT /api/admin/users/{id}
+
+DELETE /api/admin/users/{id}
+
+GET /api/admin/statistics
+
+POST /api/admin/yara-rules
+
+POST /api/admin/cve/update
+
+Adjust endpoint names to fit the existing architecture if necessary.
+
+---
+
+# 38. CODE QUALITY
+
+Follow these rules:
+
+* Type-safe code where possible
+* Clear module boundaries
+* No giant files where avoidable
+* No duplicated logic
+* No hardcoded secrets
+* Environment variables for configuration
+* Proper error handling
+* Structured logging
+* Database migrations
+* Reusable services
+* Unit tests
+* Integration tests
+* Security tests
+
+Do not remove working functionality simply to make implementation easier.
+
+---
+
+# 39. TESTING
+
+Create safe test firmware fixtures.
+
+Examples:
+
+Test firmware containing:
+
+* fake hardcoded credentials
+* fake API token
+* fake private key
+* vulnerable configuration
+* insecure permissions
+* sample software/version strings
+* suspicious shell script
+* test YARA signature
+
+Use synthetic/test indicators.
+
+Do NOT unnecessarily use real malware.
+
+Test:
+
+* upload
+* validation
+* extraction
+* file discovery
+* hashing
+* binary detection
+* strings
+* secrets
+* permissions
+* software identification
+* CVE matching
+* YARA
+* ML
+* risk scoring
+* reports
+* authentication
+* RBAC
+* scan ownership
+* automatic deletion
+
+---
+
+# 40. REALISTIC ML REQUIREMENT
+
+The ML module must be academically defensible.
+
+Provide:
+
+* dataset description
+* feature extraction
+* preprocessing
+* training
+* train/test split
+* evaluation
+* accuracy
+* precision
+* recall
+* F1 score
+* confusion matrix where appropriate
+* model saving/loading
+* inference
+
+Do not claim high accuracy without measured evaluation.
+
+If no suitable dataset is included in the existing project:
+
+1. Identify the problem.
+2. Choose an appropriate public/research dataset if permitted.
+3. Document the dataset.
+4. Create the training pipeline.
+5. Train a baseline.
+6. Report actual metrics.
+
+Do not fabricate training results.
+
+---
+
+# 41. DYNAMIC ANALYSIS
+
+DO NOT implement dynamic analysis in the first completion phase.
+
+Keep the architecture extensible so dynamic analysis can be added later.
+
+Do not execute arbitrary firmware on the host.
+
+---
+
+# 42. PERFORMANCE
+
+The application should support large firmware files reasonably.
+
+Use:
+
+* background jobs
+* streaming where practical
+* progress reporting
+* timeouts
+* cleanup
+* resource limits
+
+Do not block the main API server during long firmware analysis.
+
+---
+
+# 43. ENVIRONMENT AND DEPLOYMENT
+
+Provide:
+
+* .env.example
+* Dockerfile(s)
+* docker-compose.yml if appropriate
+* database setup
+* migration commands
+* development commands
+* production-style commands
+* dependency installation instructions
+
+The application must be reproducible on another machine.
+
+---
+
+# 44. DOCUMENTATION
+
+Update/create:
+
+README.md
+
+Include:
+
+* project overview
+* architecture
+* features
+* prerequisites
+* installation
+* environment variables
+* database setup
+* firmware-analysis tools
+* YARA setup
+* ML setup
+* CVE setup
+* running locally
+* Docker setup
+* testing
+* troubleshooting
+* security considerations
+* limitations
+
+Also document:
+
+* analyzer pipeline
+* vulnerability categories
+* risk scoring
+* ML methodology
+* data retention
+
+---
+
+# 45. DEVELOPMENT ORDER
+
+Do NOT attempt to implement everything randomly.
+
+Use this order:
+
+## Phase 1 — Audit and foundation
+
+* Audit existing code
+* Fix build errors
+* Fix frontend/backend integration
+* Fix database problems
+* Remove fake/demo analysis behavior
+
+## Phase 2 — Real firmware pipeline
+
+* upload
+* validation
+* format detection
+* temporary storage
+* extraction
+* cleanup
+
+## Phase 3 — Real filesystem analysis
+
+* file inventory
+* directories
+* permissions
+* hashes
+* file types
+* strings
+
+## Phase 4 — Security analysis
+
+* binary analysis
+* configuration analysis
+* credential detection
+* API tokens
+* private keys
+* certificates
+* suspicious files
+* network services
+
+## Phase 5 — Vulnerability engine
+
+* nine vulnerability categories
+* severity
+* evidence
+* recommendations
+* risk score
+
+## Phase 6 — Software/CVE engine
+
+* component detection
+* version detection
+* CVE lookup
+* CVSS
+* recommendations
+* CVE database updates
+
+## Phase 7 — Malware analysis
+
+* indicators
+* suspicious binaries
+* backdoors
+* botnet indicators
+* persistence
+* shell commands
+* downloaders
+* YARA
+
+## Phase 8 — ML
+
+* dataset
+* features
+* training
+* evaluation
+* model
+* inference
+* confidence
+
+## Phase 9 — Authentication/RBAC
+
+* real login
+* users
+* roles
+* scan ownership
+* admin controls
+
+## Phase 10 — Reports
+
+* complete dashboard
+* HTML report
+* PDF report
+
+## Phase 11 — Security hardening
+
+* sandboxing
+* upload security
+* archive security
+* resource limits
+* cleanup verification
+* audit logs
+
+## Phase 12 — Testing and polish
+
+* automated tests
+* UI testing
+* security testing
+* documentation
+* Docker
+* final cleanup
+
+---
+
+# 46. DO NOT BREAK THE EXISTING UI
+
+The current project already contains useful UI components.
+
+Before replacing a component, determine whether it can be reused.
+
+Preserve the overall user experience unless a change is necessary.
+
+Improve:
+
+* terminology
+* accuracy
+* loading states
+* error messages
+* accessibility
+* responsive behavior
+* analyst/general-user views
+
+---
+
+# 47. IMPORTANT UI TERMINOLOGY
+
+Use:
+
+"Firmware Scan"
+
+instead of ambiguous terminology such as:
+
+"Image Scan"
+
+where appropriate.
+
+Use:
+
+"Firmware"
+
+for the uploaded artifact.
+
+Use:
+
+"Analysis"
+
+for the process.
+
+Use:
+
+"Findings"
+
+for detected issues.
+
+Use:
+
+"Suspicious Indicator"
+
+instead of automatically calling something malware.
+
+---
+
+# 48. GENERAL USER VS SECURITY ANALYST EXPERIENCE
+
+General User:
+
+Show:
+
+* overall risk
+* major problems
+* simple explanations
+* recommendations
+* report
+
+Security Analyst:
+
+Show:
+
+* complete file tree
+* hashes
+* permissions
+* strings
+* binary details
+* CVEs
+* YARA
+* evidence
+* ML prediction
+* technical metadata
+
+Use expandable sections rather than creating two completely separate applications.
+
+---
+
+# 49. COMPLETION REQUIREMENTS
+
+The application is considered complete only when:
+
+### Firmware
+
+* real upload
+* real validation
+* real extraction
+* real filesystem analysis
+
+### Static analysis
+
+* files/directories
+* binaries
+* configs
+* credentials
+* API keys/tokens
+* private keys/certificates
+* software versions
+* network services
+* permissions
+* strings
+* suspicious files
+* hashes
+
+### Vulnerabilities
+
+* exactly nine categories
+* real detection
+* severity
+* evidence
+* recommendations
+
+### CVE
+
+* real component identification
+* version identification
+* real CVE lookup
+* CVSS/severity
+* report integration
+
+### Malware
+
+* static indicators
+* YARA
+* ML classification
+* clear distinction between indicators and confirmed malware
+
+### Risk
+
+* real risk score
+* explainable contributors
+
+### Users
+
+* real authentication
+* Admin
+* Security Analyst
+* General User
+* backend-enforced RBAC
+* scan ownership
+
+### Reports
+
+* detailed report
+* downloadable
+* PDF if practical
+
+### Data
+
+* temporary firmware
+* temporary extraction
+* automatic deletion
+* retained analysis results
+
+### Security
+
+* sandbox/isolation
+* secure upload
+* secure subprocesses
+* path traversal protection
+* resource limits
+* secure secrets
+
+---
+
+# 50. FINAL DEVELOPMENT BEHAVIOR
+
+During development:
+
+1. Work incrementally.
+2. Do not hide errors.
+3. Run tests after each major phase.
+4. Fix errors before moving forward.
+5. Keep the project runnable after each phase.
+6. Never fake functionality.
+7. Never silently remove requirements.
+8. If a requirement conflicts with the existing architecture, explain the conflict and implement the safest practical solution.
+9. If a major architectural decision is genuinely ambiguous, ask me.
+10. For minor implementation decisions, choose the best engineering solution yourself.
+11. Keep code understandable.
+12. Document important cybersecurity decisions.
+
+---
+
+# 51. FIRST RESPONSE REQUIREMENT
+
+Before modifying the codebase, perform the complete audit.
+
+Your first response should contain:
+
+### A. Existing architecture
+
+Explain what the current project contains.
+
+### B. Working features
+
+List what already works.
+
+### C. Missing features
+
+List what must be implemented.
+
+### D. Bugs/errors
+
+List actual errors found.
+
+### E. Security problems
+
+List security weaknesses in the current application.
+
+### F. Recommended architecture
+
+Explain how the existing project should be upgraded.
+
+### G. Implementation roadmap
+
+Give the exact order in which you will implement the features.
+
+Then wait for my confirmation.
+
+DO NOT immediately generate the complete codebase.
+
+---
+
+# 52. AFTER CONFIRMATION
+
+Once I confirm:
+
+* Start Phase 1.
+* Modify the existing project.
+* Show exactly what files changed.
+* Provide complete code for changed files when appropriate.
+* Run/build/test the project.
+* Report actual results.
+* Fix errors.
+* Then proceed to the next phase.
+
+Do not mark a phase complete until it has been actually implemented and tested.
+
+---
+
+# FINAL GOAL
+
+Transform the existing project from a frontend/demo-oriented firmware analyzer into a:
+
+> **REAL, MODULAR, SECURE, SOFTWARE-ONLY IoT FIRMWARE VULNERABILITY & MALWARE ANALYSIS PLATFORM**
+
+The final application must analyze actual firmware contents and provide evidence-based:
+
+**Firmware Information → File/Filesystem Analysis → Security Weaknesses → CVEs → Malware Indicators → YARA → ML Prediction → Risk Score → Recommendations → Security Report**
+
+Do not build a fake cybersecurity dashboard.
+
+Build the actual analyzer behind the dashboard.
